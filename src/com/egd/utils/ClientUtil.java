@@ -31,6 +31,23 @@ public class ClientUtil {
 	public static final String ERROR_MSG_KODE_PRODUCT_NULL = "Product tidak ditemukan ";
 	public static final String ERROR_MSG_CREATION_DATE = "Date null atau invalid ";
 	
+	/**New Column C_Order C_OrderLine*/
+	public static final String COLUMNNAME_Z_TempSalesOrder_ID="Z_TempSalesOrder_ID";
+	public static final String COLUMNNAME_CustomerPONumber="CustomerPONumber";
+	public static final String COLUMNNAME_ShipToCustomer="ShipToCustomer";
+	public static final String COLUMNNAME_KodeSubdist="KodeSubdist";
+	public static final String COLUMNNAME_CustomerSubdist="CustomerSubdist";
+	public static final String COLUMNNAME_PaymentType="PaymentType";
+	public static final String COLUMNNAME_StatusPO="StatusPO";
+	public static final String COLUMNNAME_DescStatus="DescStatus";
+	public static final String COLUMNNAME_CreationDate="CreationDate";
+	public static final String COLUMNNAME_I_IsImported="I_IsImported";
+	public static final String COLUMNNAME_Z_TempSalesOrderLine_ID="Z_TempSalesOrderLine_ID";
+	public static final String COLUMNNAME_KodeProduct="KodeProduct";
+	public static final String COLUMNNAME_KodeProdPartner="KodeProdPartner";
+	public static final String COLUMNNAME_QuantityPO="QuantityPO";
+	public static final String COLUMNNAME_uom_emos="uom_emos";
+	
 	public static String generateSHA_256(String param) {
 		return digest(SHA_256, param);
 	}
