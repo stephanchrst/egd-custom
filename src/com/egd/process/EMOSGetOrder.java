@@ -63,7 +63,7 @@ public class EMOSGetOrder extends SvrProcess{
 	    Date date = Calendar.getInstance().getTime();
 	    DateFormat dateFormat = new SimpleDateFormat(ClientUtil.stdDateFormat);  
 	    String strDate = dateFormat.format(date);  
-		//strDate = "03/03/2022";
+		strDate = "04/03/2022";//for testing only
 	    
 		String kodebp = ClientUtil.getKodeBP();
 		String secretkey = ClientUtil.getSecretKey();
@@ -139,7 +139,7 @@ public class EMOSGetOrder extends SvrProcess{
 				tempOrderLine.setKodeProdPartner(orderLine.getKodeProdPartner());
 				tempOrderLine.setQuantityPO(orderLine.getQuantityPO());
 				tempOrderLine.setuom_emos(orderLine.getUom());
-				tempOrder.setI_IsImported(false);	
+				tempOrderLine.setI_IsImported(false);	
 				tempOrderLine.saveEx();
 			}
 		}

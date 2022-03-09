@@ -106,4 +106,8 @@ public class ClientUtil {
 		log.saveEx();
 	}
 	
+    public static String left(String s, int size) {
+        return s.substring(0, Math.min(size, s.length()));
+    }
+	
 }

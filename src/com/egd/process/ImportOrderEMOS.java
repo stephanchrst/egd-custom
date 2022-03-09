@@ -15,6 +15,7 @@ import org.compiere.model.MOrderLine;
 import org.compiere.model.MProduct;
 import org.compiere.model.X_Z_TempSalesOrder;
 import org.compiere.model.X_Z_TempSalesOrderLine;
+import org.compiere.process.DocAction;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
@@ -66,12 +67,10 @@ public class ImportOrderEMOS extends SvrProcess{
 			order.setDateOrdered(creationDate);
 			order.setDatePromised(creationDate);
 			order.setDateAcct(creationDate);
-			order.setC_BPartner_ID(customer.get_ID());
+			order.setBPartner(customer);
 			order.setSalesRep_ID(customer.getSalesRep_ID());
 			order.setC_Currency_ID(ClientUtil.C_CURRENCY_ID_IDR);
 			order.setM_Warehouse_ID(M_Warehouse_ID);
-			order.setM_PriceList_ID(customer.getM_PriceList_ID());
-			order.setC_BPartner_Location_ID(customer.getPrimaryC_BPartner_Location_ID());
 			order.setIsSOTrx(true);
 			order.set_ValueOfColumn(ClientUtil.COLUMNNAME_Z_TempSalesOrder_ID, tempOrderID);
 			order.set_ValueOfColumn(ClientUtil.COLUMNNAME_CustomerPONumber, tempOrder.getCustomerPONumber());
@@ -91,17 +90,19 @@ public class ImportOrderEMOS extends SvrProcess{
 				X_Z_TempSalesOrderLine tempOrderLine = new X_Z_TempSalesOrderLine(getCtx(), tempOrderLineID, get_TrxName());
 				MProduct product = getProduct(tempOrderLine.getKodeProduct());
 				MOrderLine orderLine = new MOrderLine(getCtx(), 0, get_TrxName());
+				orderLine.setHeaderInfo(order);
 				orderLine.setC_Order_ID(order.get_ID());
 				orderLine.setLine(lineNo);
 				orderLine.setDateOrdered(creationDate);
+				orderLine.setM_Product_ID(product.get_ID());
 				orderLine.setC_UOM_ID(product.getC_UOM_ID());
 				orderLine.setM_Warehouse_ID(M_Warehouse_ID);
+				orderLine.setC_BPartner_Location_ID(order.getC_BPartner_Location_ID());
 				BigDecimal qty = new BigDecimal(tempOrderLine.getQuantityPO());
 				orderLine.setQty(qty);
 				orderLine.setC_Currency_ID(order.getC_Currency_ID());
 				orderLine.setPrice();
-				orderLine.setTax();
-				orderLine.setC_BPartner_Location_ID(order.getC_BPartner_Location_ID());
+				orderLine.setTax();//TODO review tax
 				orderLine.setLineNetAmt();
 				orderLine.set_ValueOfColumn(ClientUtil.COLUMNNAME_Z_TempSalesOrderLine_ID, tempOrderLineID);
 				orderLine.set_ValueOfColumn(ClientUtil.COLUMNNAME_CustomerPONumber, tempOrderLine.getCustomerPONumber());
@@ -117,6 +118,9 @@ public class ImportOrderEMOS extends SvrProcess{
 			}
 			tempOrder.setI_IsImported(true);
 			tempOrder.saveEx();
+			
+			order.processIt(DocAction.ACTION_Prepare);
+			order.saveEx();
 		}
 		
 		StringBuilder returnMsg = new StringBuilder();
@@ -132,7 +136,9 @@ public class ImportOrderEMOS extends SvrProcess{
 			String[] arr = creationDate.split("/");
 			int year = Integer.parseInt(arr[0]);
 			int month = Integer.parseInt(arr[1]);
-			int day = Integer.parseInt(arr[2]);
+			String strDay = arr[2];
+			strDay = ClientUtil.left(strDay, 2);
+			int day = Integer.parseInt(strDay);
 			date = TimeUtil.getDay(year, month, day);
 		}catch(Exception e) {
 			date = TimeUtil.getDay(TimeUtil.getToday().getTimeInMillis());
@@ -184,13 +190,13 @@ public class ImportOrderEMOS extends SvrProcess{
 		
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT l.Z_TempSalesOrderLine_ID FROM Z_TempSalesOrderLine l ");
-		sb.append("WHERE l.I_IsImported='N'");
+		sb.append("WHERE l.I_IsImported='N' AND Z_TempSalesOrder_ID=?");
 		
 		PreparedStatement pstmt = null;
 		try
 		{
 			pstmt = DB.prepareStatement (sb.toString(), get_TrxName());
-			//pstmt.setString(1, kodeProduct);
+			pstmt.setInt(1, Z_TempSalesOrder_ID);
 			ResultSet rs = pstmt.executeQuery ();
 			while (rs.next ())
 				list.add(rs.getInt(1));
